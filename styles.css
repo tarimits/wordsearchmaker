@@ -94,22 +94,42 @@ button:hover {
 
 #problemList {
     margin-top: 20px;
-}
-
-#problemList .problem-row {
     display: flex;
+    flex-wrap: wrap;
     justify-content: center;
-    margin-bottom: 20px;
 }
 
 #problemList .problem-item {
     border: 1px solid #bdc3c7;
     padding: 10px;
     font-size: 24px;
-    margin: 0 10px;
+    margin: 10px;
     background-color: #ecf0f1;
     border-radius: 10px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    flex: 1 0 30%;
+    max-width: 30%;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+@media print {
+    body {
+        margin: 0;
+    }
+    .container {
+        max-width: 100%;
+        box-shadow: none;
+        padding: 0;
+    }
+    #problemList .problem-item {
+        font-size: 18px;
+        margin: 5px;
+        flex: 1 0 30%;
+        max-width: 30%;
+    }
 }
