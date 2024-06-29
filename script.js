@@ -1,35 +1,32 @@
-const words = JSON.parse(localStorage.getItem('words')) || [];
-const hiragana = 'あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをんがぎぐげござじずぜぞだぢづでどばびぶべぼぱぴぷぺぽ'.split('');
+const wordList = [];
 
 function addWord() {
-    const wordInput = document.getElementById('wordInput').value;
-    if (wordInput) {
-        words.push(wordInput);
-        document.getElementById('wordInput').value = '';
+    const wordInput = document.getElementById('wordInput');
+    const word = wordInput.value.trim();
+    if (word) {
+        wordList.push(word);
         displayWords();
-        localStorage.setItem('words', JSON.stringify(words));
+        wordInput.value = '';
     }
 }
 
-function removeWord(index) {
-    words.splice(index, 1);
+function deleteWord(index) {
+    wordList.splice(index, 1);
     displayWords();
-    localStorage.setItem('words', JSON.stringify(words));
 }
 
 function displayWords() {
-    const wordList = document.getElementById('wordList');
-    wordList.innerHTML = '';
-    words.forEach((word, index) => {
+    const wordListContainer = document.getElementById('wordList');
+    wordListContainer.innerHTML = '';
+    wordList.forEach((word, index) => {
         const wordItem = document.createElement('div');
         wordItem.className = 'word-item';
         wordItem.textContent = word;
-        const removeButton = document.createElement('button');
-        removeButton.className = 'remove-word';
-        removeButton.textContent = '✖';
-        removeButton.onclick = () => removeWord(index);
-        wordItem.appendChild(removeButton);
-        wordList.appendChild(wordItem);
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = '×';
+        deleteButton.onclick = () => deleteWord(index);
+        wordItem.appendChild(deleteButton);
+        wordListContainer.appendChild(wordItem);
     });
 }
 
@@ -37,63 +34,46 @@ function generateGrid() {
     const gridContainer = document.getElementById('gridContainer');
     gridContainer.innerHTML = '';
     const grid = Array.from({ length: 8 }, () => Array(8).fill(''));
-    
-    words.forEach(word => {
-        placeWordInGrid(grid, word);
+
+    const directions = [
+        { dx: 0, dy: 1 }, // vertical
+        { dx: 1, dy: 0 }, // horizontal
+        { dx: 1, dy: 1 }, // diagonal down-right
+        { dx: 1, dy: -1 } // diagonal up-right
+    ];
+
+    wordList.forEach(word => {
+        let placed = false;
+        const difficulty = parseInt(document.getElementById('difficulty').value);
+        while (!placed) {
+            const direction = directions[Math.floor(Math.random() * difficulty)];
+            const startX = Math.floor(Math.random() * (8 - (direction.dx * word.length)));
+            const startY = Math.floor(Math.random() * (8 - (direction.dy * word.length)));
+            if (canPlaceWord(word, startX, startY, direction, grid)) {
+                placeWord(word, startX, startY, direction, grid);
+                placed = true;
+            }
+        }
     });
 
     fillEmptyCells(grid);
-    displayGrid(grid);
-    displayProblems();
+
+    grid.forEach(row => {
+        row.forEach(cell => {
+            const cellElement = document.createElement('div');
+            cellElement.className = 'grid-cell';
+            cellElement.textContent = cell;
+            gridContainer.appendChild(cellElement);
+        });
+    });
+
+    generateProblems();
 }
 
-function placeWordInGrid(grid, word) {
-    const directions = getDirections();
-    const maxAttempts = 100;
-    let placed = false;
-    for (let attempt = 0; attempt < maxAttempts; attempt++) {
-        const direction = directions[Math.floor(Math.random() * directions.length)];
-        const { startX, startY, deltaX, deltaY } = getStartPositionAndDeltas(grid, word, direction);
-        
-        if (canPlaceWord(grid, word, startX, startY, deltaX, deltaY)) {
-            for (let i = 0; i < word.length; i++) {
-                grid[startY + i * deltaY][startX + i * deltaX] = word[i];
-            }
-            placed = true;
-            break;
-        }
-    }
-    if (!placed) {
-        console.error(`Unable to place word: ${word}`);
-    }
-}
-
-function getDirections() {
-    const difficulty = parseInt(document.getElementById('difficulty').value, 10);
-    const directions = {
-        1: [{ deltaX: 0, deltaY: 1 }],
-        2: [{ deltaX: 1, deltaY: 0 }],
-        3: [{ deltaX: 0, deltaY: 1 }, { deltaX: 1, deltaY: 0 }],
-        4: [{ deltaX: 0, deltaY: 1 }, { deltaX: 1, deltaY: 0 }, { deltaX: 1, deltaY: 1 }, { deltaX: 1, deltaY: -1 }]
-    };
-    return directions[difficulty];
-}
-
-function getStartPositionAndDeltas(grid, word, direction) {
-    const maxStartX = direction.deltaX === 0 ? grid[0].length - 1 : grid[0].length - word.length;
-    const maxStartY = direction.deltaY === 0 ? grid.length - 1 : grid.length - word.length;
-    const startX = Math.floor(Math.random() * (maxStartX + 1));
-    const startY = Math.floor(Math.random() * (maxStartY + 1));
-    return { startX, startY, deltaX: direction.deltaX, deltaY: direction.deltaY };
-}
-
-function canPlaceWord(grid, word, startX, startY, deltaX, deltaY) {
+function canPlaceWord(word, startX, startY, direction, grid) {
     for (let i = 0; i < word.length; i++) {
-        const x = startX + i * deltaX;
-        const y = startY + i * deltaY;
-        if (x < 0 || x >= grid[0].length || y < 0 || y >= grid.length) {
-            return false;
-        }
+        const x = startX + i * direction.dx;
+        const y = startY + i * direction.dy;
         if (grid[y][x] !== '' && grid[y][x] !== word[i]) {
             return false;
         }
@@ -101,9 +81,18 @@ function canPlaceWord(grid, word, startX, startY, deltaX, deltaY) {
     return true;
 }
 
+function placeWord(word, startX, startY, direction, grid) {
+    for (let i = 0; i < word.length; i++) {
+        const x = startX + i * direction.dx;
+        const y = startY + i * direction.dy;
+        grid[y][x] = word[i];
+    }
+}
+
 function fillEmptyCells(grid) {
-    for (let y = 0; y < grid.length; y++) {
-        for (let x = 0; x < grid[y].length; x++) {
+    const hiragana = 'あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをんがぎぐげござじずぜぞだぢづでどばびぶべぼぱぴぷぺぽ';
+    for (let y = 0; y < 8; y++) {
+        for (let x = 0; x < 8; x++) {
             if (grid[y][x] === '') {
                 grid[y][x] = hiragana[Math.floor(Math.random() * hiragana.length)];
             }
@@ -111,38 +100,16 @@ function fillEmptyCells(grid) {
     }
 }
 
-function displayGrid(grid) {
-    const gridContainer = document.getElementById('gridContainer');
-    grid.forEach(row => {
-        row.forEach(cell => {
-            const gridItem = document.createElement('div');
-            gridItem.className = 'grid-item';
-            gridItem.textContent = cell;
-            gridContainer.appendChild(gridItem);
-        });
-    });
-}
-
-function displayProblems() {
+function generateProblems() {
     const problemList = document.getElementById('problemList');
     problemList.innerHTML = '';
-    let row = document.createElement('div');
-    row.className = 'problem-row';
-    problemList.appendChild(row);
-
-    words.forEach((word, index) => {
-        const problemItem = document.createElement('span');
+    wordList.forEach(word => {
+        const problemItem = document.createElement('div');
         problemItem.className = 'problem-item';
         const missingIndex = Math.floor(Math.random() * word.length);
-        const problemWord = word.split('').map((char, i) => i === missingIndex ? '__' : char).join('');
-        problemItem.textContent = problemWord;
-        row.appendChild(problemItem);
-
-        if ((index + 1) % 3 === 0 && index !== words.length - 1) {
-            row = document.createElement('div');
-            row.className = 'problem-row';
-            problemList.appendChild(row);
-        }
+        const displayWord = word.split('').map((char, i) => (i === missingIndex ? '__' : char)).join('');
+        problemItem.textContent = displayWord;
+        problemList.appendChild(problemItem);
     });
 }
 
@@ -150,16 +117,14 @@ function printContent() {
     const originalContent = document.body.innerHTML;
     const gridContent = document.getElementById('gridContainer').outerHTML;
     const problemContent = document.getElementById('problemList').outerHTML;
-    document.body.innerHTML = gridContent + problemContent;
+    document.body.innerHTML = `<div>${gridContent}</div><div>${problemContent}</div>`;
     window.print();
     document.body.innerHTML = originalContent;
 }
 
-document.getElementById('wordInput').addEventListener('keypress', function (event) {
-    if (event.key === 'Enter') {
-        event.preventDefault();
+document.getElementById('wordInput').addEventListener('keypress', function (e) {
+    if (e.key === 'Enter') {
+        e.preventDefault();
         addWord();
     }
 });
-
-document.addEventListener('DOMContentLoaded', displayWords);
