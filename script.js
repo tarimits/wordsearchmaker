@@ -126,23 +126,19 @@ function displayGrid(grid) {
 function displayProblems() {
     const problemList = document.getElementById('problemList');
     problemList.innerHTML = '';
-    let row = document.createElement('div');
-    row.className = 'problem-row';
-    problemList.appendChild(row);
-
+    let row;
     words.forEach((word, index) => {
-        const problemItem = document.createElement('span');
-        problemItem.className = 'problem-item';
-        const missingIndex = Math.floor(Math.random() * word.length);
-        const problemWord = word.split('').map((char, i) => i === missingIndex ? '__' : char).join('');
-        problemItem.textContent = problemWord;
-        row.appendChild(problemItem);
-
-        if ((index + 1) % 3 === 0 && index !== words.length - 1) {
+        if (index % 3 === 0) {
             row = document.createElement('div');
             row.className = 'problem-row';
             problemList.appendChild(row);
         }
+        const problemItem = document.createElement('div');
+        problemItem.className = 'problem-item';
+        const missingIndex = Math.floor(Math.random() * word.length);
+        const displayWord = word.split('').map((char, i) => (i === missingIndex ? '__' : char)).join('');
+        problemItem.textContent = displayWord;
+        row.appendChild(problemItem);
     });
 }
 
@@ -150,7 +146,7 @@ function printContent() {
     const originalContent = document.body.innerHTML;
     const gridContent = document.getElementById('gridContainer').outerHTML;
     const problemContent = document.getElementById('problemList').outerHTML;
-    document.body.innerHTML = gridContent + problemContent;
+    document.body.innerHTML = `<div>${gridContent}</div><div>${problemContent}</div>`;
     window.print();
     document.body.innerHTML = originalContent;
 }
@@ -163,4 +159,3 @@ document.getElementById('wordInput').addEventListener('keypress', function (even
 });
 
 document.addEventListener('DOMContentLoaded', displayWords);
-
