@@ -1,29 +1,25 @@
-!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ことばさがしメーカーー</title>
+    <title>ことばさがしゲーム</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
-        <h1>ことばさがしメーカー
-        </h1>
-        <form id="wordForm">
+        <h1>ことばさがしゲーム</h1>
+        <form onsubmit="addWord(); return false;">
             <input type="text" id="wordInput" placeholder="単語を入力してください" required>
             <button type="button" onclick="addWord()">追加</button>
         </form>
         <div id="wordList"></div>
-        <div>
-            難易度:
-            <select id="difficulty">
-                <option value="1">縦のみ</option>
-                <option value="2">横のみ</option>
-                <option value="3">縦横</option>
-                <option value="4">縦横斜め</option>
-            </select>
-        </div>
+        <select id="difficulty">
+            <option value="1">縦のみ</option>
+            <option value="2">横のみ</option>
+            <option value="3">縦横</option>
+            <option value="4">縦横斜め</option>
+        </select>
         <button onclick="generateGrid()">生成</button>
         <div id="gridContainer"></div>
         <div id="problemList"></div>
