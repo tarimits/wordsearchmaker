@@ -45,6 +45,11 @@ button:hover {
     background-color: #2980b9;
 }
 
+#errorContainer {
+    color: #e74c3c;
+    margin: 20px 0;
+}
+
 #wordList {
     margin: 20px 0;
 }
@@ -74,7 +79,7 @@ button:hover {
 #gridContainer {
     display: grid;
     grid-template-columns: repeat(8, 1fr);
-    gap: 5px;
+    gap: 0;
     justify-content: center;
     margin-top: 20px;
 }
@@ -97,6 +102,12 @@ button:hover {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
+}
+
+#problemList .problem-row {
+    display: flex;
+    justify-content: center;
+    width: 100%;
 }
 
 #problemList .problem-item {
