@@ -37,10 +37,20 @@ function generateGrid() {
     const gridContainer = document.getElementById('gridContainer');
     gridContainer.innerHTML = '';
     const grid = Array.from({ length: 8 }, () => Array(8).fill(''));
-    
+
+    let allWordsPlaced = true;
+
     words.forEach(word => {
-        placeWordInGrid(grid, word);
+        const placed = placeWordInGrid(grid, word);
+        if (!placed) {
+            allWordsPlaced = false;
+        }
     });
+
+    if (!allWordsPlaced) {
+        displayError("単語をすべて配置できませんでした。入力した単語を減らしてください。");
+        return;
+    }
 
     fillEmptyCells(grid);
     displayGrid(grid);
@@ -50,22 +60,18 @@ function generateGrid() {
 function placeWordInGrid(grid, word) {
     const directions = getDirections();
     const maxAttempts = 100;
-    let placed = false;
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
         const direction = directions[Math.floor(Math.random() * directions.length)];
         const { startX, startY, deltaX, deltaY } = getStartPositionAndDeltas(grid, word, direction);
-        
+
         if (canPlaceWord(grid, word, startX, startY, deltaX, deltaY)) {
             for (let i = 0; i < word.length; i++) {
                 grid[startY + i * deltaY][startX + i * deltaX] = word[i];
             }
-            placed = true;
-            break;
+            return true;
         }
     }
-    if (!placed) {
-        console.error(`Unable to place word: ${word}`);
-    }
+    return false;
 }
 
 function getDirections() {
@@ -140,6 +146,16 @@ function displayProblems() {
         problemItem.textContent = displayWord;
         row.appendChild(problemItem);
     });
+}
+
+function displayError(message) {
+    const errorContainer = document.getElementById('errorContainer');
+    errorContainer.textContent = message;
+}
+
+function clearError() {
+    const errorContainer = document.getElementById('errorContainer');
+    errorContainer.textContent = '';
 }
 
 function printContent() {
