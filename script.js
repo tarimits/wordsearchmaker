@@ -48,7 +48,7 @@ function generateGrid() {
     });
 
     if (!allWordsPlaced) {
-        displayError("単語をすべて配置できませんでした。入力した単語を減らしてください。");
+        displayError("単語をすべて配置できません。何度か生成を押すか単語を減らしてください。");
         return;
     }
 
