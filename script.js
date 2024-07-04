@@ -141,7 +141,7 @@ function displayProblems() {
         }
         const problemItem = document.createElement('div');
         problemItem.className = 'problem-item';
-        const missingIndex = Math.floor(Math.random() * word.length);
+        const missingIndex = 1 + Math.floor(Math.random() * word.length);
         const displayWord = word.split('').map((char, i) => (i === missingIndex ? '__' : char)).join('');
         problemItem.textContent = displayWord;
         row.appendChild(problemItem);
